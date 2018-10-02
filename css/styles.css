@@ -355,6 +355,19 @@ p.review-rating {
   -webkit-clip-path: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%);
   clip-path: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%);
 }
+.skip-link {
+  position: absolute;
+  top: 24px;
+  left: -110px;
+  background: #f3ba40;
+  color: #000;
+  padding: 10px;
+  z-index: 99999999;
+  transition: all .3s ease;
+}
+.skip-link:focus {
+  left: 0px;
+}
 
 @media screen and (min-width: 601px) {
   /*First page*/
