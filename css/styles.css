@@ -334,6 +334,20 @@ p.review-rating {
   line-height: 24px;
   letter-spacing: 0;
 }
+#restaurant-hours caption {
+  background: #000;
+  padding: 11px;
+  width: 92%;
+  color: #ecad17;
+  text-transform: uppercase;
+  margin: 0 auto;
+  border-radius: 10px 10px 0px 0px;
+}
+table#restaurant-hours th {
+  padding: 10px;
+  color: #ecad17;
+  font-size: 18px;
+}
 #restaurant-hours tr {
   background: #000;
 }
@@ -415,6 +429,9 @@ p.review-rating {
       width: 100%;
       margin-top: 16px;
   }
+  #restaurant-hours caption {
+    width: 95%;
+  }
   #restaurant-hours td:first-child {
     font-size: 17px;
     font-weight: normal;
@@ -447,6 +464,9 @@ p.review-rating {
   table#restaurant-hours {
       width: 100%;
       margin-top: -12px;
+  }
+  #restaurant-hours caption {
+    width: 96%;
   }
   #restaurant-hours td:first-child {
     font-size: 19px;
@@ -494,6 +514,9 @@ p.review-rating {
     width: 44%;
     margin-top: 101px;
   }
+  #restaurant-hours caption {
+    width: 93%;
+  }
   #restaurant-hours td:first-child {
     font-size: 16px;
   }
@@ -529,6 +552,9 @@ p.review-rating {
   }
   table#restaurant-hours {
     width: 40%;
+  }
+  #restaurant-hours caption {
+    width: 94%;
   }
   #restaurant-hours td:first-child {
     font-size: 17px;

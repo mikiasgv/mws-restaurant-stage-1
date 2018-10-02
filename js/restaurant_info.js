@@ -110,15 +110,35 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
  */
 fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
   const hours = document.getElementById('restaurant-hours');
+  const caption = document.createElement('caption');
+  caption.innerHTML = 'restaurant working schedule';
+  //creating the table heder
+  const rowH = document.createElement('tr');
+
+  const dayH = document.createElement('th');
+  dayH.innerHTML = 'Day';
+  dayH.scope = "col";
+  rowH.appendChild(dayH);
+
+  const dayT = document.createElement('th');
+  dayT.innerHTML = 'Time';
+  dayT.scope = "col";
+  rowH.appendChild(dayT);
+
+  hours.appendChild(rowH);
+
+  hours.appendChild(caption);
   for (let key in operatingHours) {
     const row = document.createElement('tr');
 
     const day = document.createElement('td');
     day.innerHTML = key;
+    day.scope = "row";
     row.appendChild(day);
 
     const time = document.createElement('td');
     time.innerHTML = operatingHours[key];
+    time.scope = "row";
     row.appendChild(time);
 
     hours.appendChild(row);
