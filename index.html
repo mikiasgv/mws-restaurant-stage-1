@@ -13,10 +13,10 @@
 
 <body>
   <header>
-    <a href="#filter-options" class="skip-link">Skip the map</a>
     <nav role="navigation">
       <h1><a aria-label="Home"  href="/">Restaurant Reviews</a></h1>
     </nav>
+    <a href="#filter-options" class="skip-link">Skip the map</a>
   </header>
 
   <main id="maincontent" role="main">
@@ -26,9 +26,11 @@
     <section>
       <div id="filter-options" class="filter-options" tabindex="-1">
         <h2>Filter Results</h2>
+        <label for="neighborhoods-select">Choose Neighborhoods</label>
         <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
           <option value="all">All Neighborhoods</option>
         </select>
+        <label for="cuisines-select">Choose Cuisines</label>
         <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
           <option value="all">All Cuisines</option>
         </select>

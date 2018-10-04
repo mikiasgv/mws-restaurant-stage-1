@@ -202,8 +202,8 @@ nav h1 a {
 .inside #map-container {
   height: 200px;
   width: 100%;
-  order: 3;
-  margin-top: -130px;
+  /*order: 3;
+  margin-top: -130px;*/
 }
 .inside #map {
   background-color: #ccc;
@@ -481,12 +481,10 @@ table#restaurant-hours th {
     width: 42%;
   }
 
-  .inside #map-container {
+  /*.inside #map-container {
     height: 200px;
     width: 100%;
-    order: 0;
-    margin-top: 0px;
-  }
+  }*/
 }
 
 @media screen and (min-width: 915px) {

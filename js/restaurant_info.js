@@ -114,9 +114,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
   const hours = document.getElementById('restaurant-hours');
   const caption = document.createElement('caption');
+  caption.id = "schedule-caption";
   caption.innerHTML = 'restaurant working schedule';
   //creating the table heder
   const rowH = document.createElement('tr');
+  rowH.tabIndex = 0;
 
   const dayH = document.createElement('th');
   dayH.innerHTML = 'Day';
@@ -133,6 +135,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
   hours.appendChild(caption);
   for (let key in operatingHours) {
     const row = document.createElement('tr');
+    row.tabIndex = 0;
 
     const day = document.createElement('td');
     day.innerHTML = key;
@@ -180,22 +183,26 @@ createReviewHTML = (review) => {
   const name = document.createElement('p');
   name.classList.add("review-name");
   name.innerHTML = review.name;
+  name.tabIndex = 0;
   div.appendChild(name);
 
   const date = document.createElement('p');
   date.innerHTML = review.date;
   date.classList.add("review-date");
+  date.tabIndex = 0;
   div.appendChild(date);
 
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
   rating.classList.add("review-rating");
+  rating.tabIndex = 0;
   div.appendChild(rating);
 
   li.appendChild(div);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
+  comments.tabIndex = 0;
   li.appendChild(comments);
 
 
