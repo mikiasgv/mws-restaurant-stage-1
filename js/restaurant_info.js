@@ -115,6 +115,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
   const hours = document.getElementById('restaurant-hours');
   const caption = document.createElement('caption');
   caption.id = "schedule-caption";
+  caption.classList.add('screenreader');
   caption.innerHTML = 'restaurant working schedule';
   //creating the table heder
   const rowH = document.createElement('tr');

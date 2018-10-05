@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -21,16 +21,16 @@
 
   <main id="maincontent" role="main">
     <section id="map-container">
-      <div id="map"></div>
+      <div id="map" aria-label="Map indicates the restaurants location"></div>
     </section>
     <section>
       <div id="filter-options" class="filter-options" tabindex="-1">
         <h2>Filter Results</h2>
-        <label for="neighborhoods-select">Choose Neighborhoods</label>
+        <label for="neighborhoods-select" class="screenreader">Choose Neighborhoods</label>
         <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
           <option value="all">All Neighborhoods</option>
         </select>
-        <label for="cuisines-select">Choose Cuisines</label>
+        <label for="cuisines-select" class="screenreader">Choose Cuisines</label>
         <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
           <option value="all">All Cuisines</option>
         </select>
