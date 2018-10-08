@@ -1,9 +1,12 @@
-var CACHE_NAME = 'restaurant-app-v1';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v2';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v2';
 const cacheFiles = [
     '/',
     '/index.html',
     '/restaurant.html',
+    'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
     '/css/styles.css',
+    'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
     '/js/dbhelper.js',
     '/js/main.js',
     '/js/restaurant_info.js',
@@ -18,36 +21,6 @@ const cacheFiles = [
     '/img/8.jpg',
     '/img/9.jpg',
     '/img/10.jpg',
-    '/img/1-420px.jpg',
-    '/img/1-600px.jpg',
-    '/img/1-800px.jpg',
-    '/img/2-420px.jpg',
-    '/img/2-600px.jpg',
-    '/img/2-800px.jpg',
-    '/img/3-420px.jpg',
-    '/img/3-600px.jpg',
-    '/img/3-800px.jpg',
-    '/img/4-420px.jpg',
-    '/img/4-600px.jpg',
-    '/img/4-800px.jpg',
-    '/img/5-420px.jpg',
-    '/img/5-600px.jpg',
-    '/img/5-800px.jpg',
-    '/img/6-420px.jpg',
-    '/img/6-600px.jpg',
-    '/img/6-800px.jpg',
-    '/img/7-420px.jpg',
-    '/img/7-600px.jpg',
-    '/img/7-800px.jpg',
-    '/img/8-420px.jpg',
-    '/img/8-600px.jpg',
-    '/img/8-800px.jpg',
-    '/img/9-420px.jpg',
-    '/img/9-600px.jpg',
-    '/img/9-800px.jpg',
-    '/img/10-420px.jpg',
-    '/img/10-600px.jpg',
-    '/img/10-800px.jpg',
     '/img/favicons/favicon-16x16.png',
     '/img/favicons/favicon-32x32.png',
     '/img/favicons/favicon-96x96.png'
@@ -55,13 +28,29 @@ const cacheFiles = [
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
-      caches.open(CACHE_NAME).then(function(cache) {
+      caches.open(CACHE_NAME_STATIC).then(function(cache) {
         return cache.addAll(cacheFiles);
       })
     );
 });
 
+self.addEventListener('activate', function(event) {
+    event.waitUntil(
+      caches.keys().then(function(cacheNames) {
+        return Promise.all(
+          cacheNames.filter(function(cacheName) {
+            return cacheName.startsWith('restaurant-app-') &&
+                   cacheName != CACHE_NAME_STATIC && cacheName != CACHE_NAME_DYNAMIC;
+          }).map(function(cacheName) {
+            return caches.delete(cacheName);
+          })
+        );
+      })
+    );
+});
+
 self.addEventListener('fetch', function(event) {
+    //console.log(event.request);
     event.respondWith(
       caches.match(event.request)
         .then(function(response) {
@@ -76,27 +65,24 @@ self.addEventListener('fetch', function(event) {
           // to clone the response.
           var fetchRequest = event.request.clone();
   
-          return fetch(fetchRequest).then(
-            function(response) {
+          return fetch(fetchRequest)
+            .then(function(response) {
               // Check if we received a valid response
               if(!response || response.status !== 200 || response.type !== 'basic') {
                 return response;
               }
   
-              // IMPORTANT: Clone the response. A response is a stream
-              // and because we want the browser to consume the response
-              // as well as the cache consuming the response, we need
-              // to clone it so we have two streams.
               var responseToCache = response.clone();
   
-              caches.open(CACHE_NAME)
+              caches.open(CACHE_NAME_DYNAMIC)
                 .then(function(cache) {
                   cache.put(event.request, responseToCache);
                 });
   
               return response;
-            }
-          );
+            }).catch(function(err){
+                console.log(err);
+            });
         })
       );
   });
