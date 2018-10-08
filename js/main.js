@@ -2,7 +2,9 @@ let restaurants,
   neighborhoods,
   cuisines
 var newMap
-var markers = []
+var markers = [];
+const updateReadyUX = document.getElementById('new-updates-indicator');
+
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -14,16 +16,52 @@ document.addEventListener('DOMContentLoaded', (event) => {
   registerServiceWorker();
 });
 
+
+/**
+ * Register the serviceworker and so...
+ */
 registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      
+      if (!navigator.serviceWorker.controller) {
+        return;
+      }
+  
+      if (registration.waiting) {
+        updateReady(registration.waiting);
+        return;
+      }
+  
+      if (registration.installing) {
+        trackInstalling(reg.installing);
+        return;
+      }
+  
+      registration.addEventListener('updatefound', function() {
+        trackInstalling(registration.installing);
+      });
+
       // Registration was successful
       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
     }, function(err) {
       // registration failed :(
       console.log('ServiceWorker registration failed: ', err);
     });
   }
+}
+
+trackInstalling = (worker) => {
+  worker.addEventListener('statechange', function() {
+    if (worker.state == 'installed') {
+      updateReady(worker);
+    }
+  });
+};
+
+updateReady = (worker) => {
+  worker.postMessage({action: 'skipWaiting'});
 }
 
 /**

@@ -1,5 +1,5 @@
-const CACHE_NAME_STATIC = 'restaurant-app-stat-v2';
-const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v2';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v7';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v7';
 const cacheFiles = [
     '/',
     '/index.html',
@@ -86,3 +86,9 @@ self.addEventListener('fetch', function(event) {
         })
       );
   });
+
+  self.addEventListener('message', function(event){
+    if(event.data.action == 'skipWaiting'){
+        self.skipWaiting();
+    }
+});
