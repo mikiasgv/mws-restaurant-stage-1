@@ -49,6 +49,11 @@ self.addEventListener('activate', function(event) {
     );
 });
 
+/**
+ * The below code is taken from the site "Service Workers: an Introduction, By Matt Gaunt"
+ * It was listed as "Additional Resources" on UDACITY
+ * URL: https://developers.google.com/web/fundamentals/primers/service-workers/
+ */
 self.addEventListener('fetch', function(event) {
     //console.log(event.request);
     event.respondWith(
@@ -91,4 +96,4 @@ self.addEventListener('fetch', function(event) {
     if(event.data.action == 'skipWaiting'){
         self.skipWaiting();
     }
-});
+  });
