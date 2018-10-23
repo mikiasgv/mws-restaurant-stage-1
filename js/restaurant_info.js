@@ -80,7 +80,7 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
-  const imageURL = DBHelper.imageUrlForRestaurant(restaurant).split('.');
+  const imageURL = DBHelper.imageUrlForRestaurant(restaurant);
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
@@ -90,8 +90,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.srcset = `${imageURL[0]}.${imageURL[1]} 320w, ${imageURL[0]}-420px.${imageURL[1]} 420w, 
-                  ${imageURL[0]}-600px.${imageURL[1]} 600w, ${imageURL[0]}-800px.${imageURL[1]} 800w`;
+  image.srcset = `${imageURL}.jpg 320w, ${imageURL}-420px.jpg 420w, 
+                  ${imageURL}-600px.jpg 600w, ${imageURL}-800px.jpg 800w`;
   //image.sizes = "(max-width: 600px) 100vw, (max-width: 915px) 33.3vw, (min-width: 1120px) 25vw, (min-width: 1520px) 20vw";                
   
   image.sizes = "(max-width: 915px) 100vw,  (max-width: 1120px) 56vw 20vw";

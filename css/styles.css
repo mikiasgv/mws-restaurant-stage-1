@@ -423,16 +423,10 @@ table#restaurant-hours th {
   html {
     font-size: 16px;
   }
-  nav h1 a {
-    font-size: 1.4rem;
-  }
 }
 
 @media screen and (min-width: 601px) {
   /*First page*/
-  nav h1 a {
-    font-size: 1.5rem;
-  }
   #restaurants-list li h3 {
     font-size: 1.08rem;
   }

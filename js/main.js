@@ -212,13 +212,13 @@ createRestaurantHTML = (restaurant) => {
   const attr = document.createAttribute("role"); 
   attr.value = "article";
   article.setAttributeNode(attr);  
-  const imageURL = DBHelper.imageUrlForRestaurant(restaurant).split('.');
+  const imageURL = DBHelper.imageUrlForRestaurant(restaurant);
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.srcset = `${imageURL[0]}.${imageURL[1]} 320w, ${imageURL[0]}-420px.${imageURL[1]} 420w, 
-                  ${imageURL[0]}-600px.${imageURL[1]} 600w, ${imageURL[0]}-800px.${imageURL[1]} 800w`;
+  image.srcset = `${imageURL}.jpg 320w, ${imageURL}-420px.jpg 420w, 
+                  ${imageURL}-600px.jpg 600w, ${imageURL}-800px.jpg 800w`;
   image.sizes = "(max-width: 600px) 100vw, (max-width: 915px) 50vw, (max-width: 1120px) 33.3vw, (max-width: 1520px) 25vw, 20vw";              
   //image.sizes = "(min-width: 601px) 33.3vw,  100vw";
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
