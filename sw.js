@@ -1,5 +1,5 @@
-const CACHE_NAME_STATIC = 'restaurant-app-stat-v9';
-const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v9';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v10';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v10';
 const cacheFiles = [
     '/',
     '/index.html',
