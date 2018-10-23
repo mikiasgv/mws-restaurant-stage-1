@@ -23,7 +23,9 @@ const cacheFiles = [
     '/img/10.jpg',
     '/img/favicons/favicon-16x16.png',
     '/img/favicons/favicon-32x32.png',
-    '/img/favicons/favicon-96x96.png'
+    '/img/favicons/favicon-96x96.png',
+    '/img/favicons/favicon-192.png',
+    '/img/favicons/favicon-512.png'
   ];
 
 self.addEventListener('install', function(event) {
