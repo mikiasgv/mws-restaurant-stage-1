@@ -1,5 +1,5 @@
-const CACHE_NAME_STATIC = 'restaurant-app-stat-v11';
-const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v11';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v12';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v12';
 const cacheFiles = [
     '/',
     '/index.html',
@@ -28,7 +28,7 @@ const cacheFiles = [
     '/img/favicons/favicon-192.png',
     '/img/favicons/favicon-512.png'
   ];
-////AAAACCC
+
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open(CACHE_NAME_STATIC).then(function(cache) {
