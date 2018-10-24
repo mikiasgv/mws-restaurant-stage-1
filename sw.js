@@ -1,7 +1,8 @@
-const CACHE_NAME_STATIC = 'restaurant-app-stat-v12';
-const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v12';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v13';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v13';
 const cacheFiles = [
     '/',
+    '/manifest.json',
     '/index.html',
     '/restaurant.html',
     'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
