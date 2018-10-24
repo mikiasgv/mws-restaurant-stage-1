@@ -27,7 +27,7 @@ const cacheFiles = [
     '/img/favicons/favicon-192.png',
     '/img/favicons/favicon-512.png'
   ];
-
+//AAASSSQQQ
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open(CACHE_NAME_STATIC).then(function(cache) {
