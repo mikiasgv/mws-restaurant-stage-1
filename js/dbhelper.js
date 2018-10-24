@@ -3,6 +3,18 @@
  */
 class DBHelper {
 
+  static openDatabase(){
+    // If the browser doesn't support service worker,
+    // we don't care about having a database
+    if (!navigator.serviceWorker) {
+      return Promise.resolve();
+    }
+  
+    return idb.open('mws-restaurant', 1, upgradeDb => {
+      upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+    });
+  }
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -16,11 +28,35 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       fetch(DBHelper.DATABASE_URL)
-      .then(response =>  response.json())
-      .then(restaurants => resolve(restaurants))
-      .catch(err =>  reject(err));
+      .then(response => response.json())
+      .then(restaurants => {
+        DBHelper.openDatabase()
+        .then(db => {
+          if (!db) return;
+
+          var tx = db.transaction('restaurants', 'readwrite');
+          var restaurantStore = tx.objectStore('restaurants');
+          restaurants.forEach(restaurant => restaurantStore.put(restaurant));
+          
+          resolve(restaurants);
+        })
+      })
+      .catch(err => {
+        console.error(err);
+        console.log('from cache');
+        return DBHelper.openDatabase()
+        .then(db => {
+          if (!db) return;
+  
+          var tx = db.transaction('restaurants');
+          var restaurantStore = tx.objectStore('restaurants');
+        
+          resolve(restaurantStore.getAll());
+        });
+        
+      });
     });
   }
 

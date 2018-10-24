@@ -6,6 +6,7 @@ const cacheFiles = [
     '/restaurant.html',
     'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
     '/css/styles.css',
+    '/js/idb.js',
     'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
     '/js/dbhelper.js',
     '/js/main.js',
@@ -27,7 +28,7 @@ const cacheFiles = [
     '/img/favicons/favicon-192.png',
     '/img/favicons/favicon-512.png'
   ];
-
+////AAAACCC
 self.addEventListener('install', function(event) {
     event.waitUntil(
       caches.open(CACHE_NAME_STATIC).then(function(cache) {
