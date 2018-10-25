@@ -18,6 +18,7 @@
   "homepage": "https://github.com/mikiasgv/mws-restaurant-stage-1#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-responsive": "^2.11.0"
+    "gulp-responsive": "^2.11.0",
+    "minimatch": "^3.0.2"
   }
 }
