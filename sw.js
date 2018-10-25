@@ -1,5 +1,5 @@
-const CACHE_NAME_STATIC = 'restaurant-app-stat-v13';
-const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v13';
+const CACHE_NAME_STATIC = 'restaurant-app-stat-v14';
+const CACHE_NAME_DYNAMIC = 'restaurant-app-dynamic-v14';
 const cacheFiles = [
     '/',
     '/manifest.json',
