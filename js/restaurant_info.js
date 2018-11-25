@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
   DBHelper.openDatabase();
   DBHelper.registerServiceWorker();
+  /**
+   * This will check the connection status on page first load
+   * if there are data saved offline then will send it to the database
+   */
+  window.onload = () => {
+    handleConnectionChange();
+  };
 });
 
 /**
@@ -258,6 +265,10 @@ addNewReviewsToPage = (reviews) => {
   }
 }
 
+handleConnectionChange = () => {
+  DBHelper.handleConnectionChange();
+}
+
 /**
  * Save data to the api server while the app is online
  */
@@ -453,3 +464,8 @@ getParameterByName = (name, url) => {
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+/**
+ * Listene for network change
+ */
+window.addEventListener('online', DBHelper.handleConnectionChange);
+window.addEventListener('offline', DBHelper.handleConnectionChange);

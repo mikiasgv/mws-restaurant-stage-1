@@ -379,5 +379,38 @@ static updateReady(worker){
     });
   }
 
+  //offlin online indicator
+  static checkNetworkStatus() {
+    return new Promise((resolve) => {
+      if (navigator.onLine) {
+        //Check if the server is up and running
+        fetch('http://localhost:1337/restaurants/?limit=1')
+        .then((resp) => {
+          if(resp.ok) {
+            resolve(true);
+          }
+          resolve(false);
+        })
+        .catch(() => resolve(false)); 
+      } else {
+        resolve(false);
+      }
+    });
+  } 
+
+  static handleConnectionChange() {
+    return new Promise((resolve) => {
+      DBHelper.checkNetworkStatus()
+      .then((status) => {
+        if(status){
+          console.log("You are online.");
+        } else {
+          console.log("You lost connection.");
+        }
+      });
+    });
+    
+  }
+
 }
 
