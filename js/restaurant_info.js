@@ -279,6 +279,20 @@ postDataFromThePage = (url, data, store) => {
   });
 }
 
+handleNotification = (message) => {
+  const notificationContainer = document.getElementById('online-offline-notification');
+  const notificationBody = document.getElementById('notification-body');
+  const closeNotification = document.getElementById('close-notification');
+
+  notificationBody.innerHTML = message.detail;
+  notificationBody.tabIndex = 0;
+  notificationContainer.classList.add('notification-show');
+  closeNotification.addEventListener('click', (event) => {
+    event.preventDefault();
+    notificationContainer.classList.remove('notification-show');
+  });
+}
+
 /**
  * Create new reviews form HTML and add it to the webpage.
  */
@@ -469,3 +483,7 @@ getParameterByName = (name, url) => {
  */
 window.addEventListener('online', DBHelper.handleConnectionChange);
 window.addEventListener('offline', DBHelper.handleConnectionChange);
+/**
+ * Listene for notification event
+ */
+window.addEventListener('customnotification', handleNotification);

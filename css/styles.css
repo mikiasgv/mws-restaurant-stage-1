@@ -57,7 +57,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
-  height: 5rem;
+  height: 6rem;
   background-color: #131619;
   display: flex;
   align-items: center;
@@ -533,6 +533,42 @@ select {
   font-weight: 600;
 }
 
+/*============Online-offline-notification================*/
+#online-offline-notification {
+  border-radius: 32px 2px 2px 2px;
+  background: #ecad17;
+  position: absolute;
+  display: flex;
+  top: 123px;
+  right: 0;
+  align-items: center;
+  height: 30px;
+  transition: all 0.3s ease-out;
+  transform: translateX(100%);
+  padding: 0 12px 0 45px;
+}
+
+#online-offline-notification p {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 20px;
+  color: #000;
+}
+div#online-offline-notification button {
+  background: #ecad17;
+  border: 2px solid #000;
+  border-radius: 100%;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.notification-show {
+  transform: translateX(0%) !important;
+}
+
+/*================Medai query=====================*/
 @media screen and (min-width: 400px) {
   html {
     font-size: 14.5px;
@@ -540,16 +576,25 @@ select {
   nav h1 a {
     font-size: 1.3rem;
   }
+  #online-offline-notification {
+    top: 131px;
+  }
 }
 
 @media screen and (min-width: 500px) {
   html {
     font-size: 16px;
   }
+  #online-offline-notification {
+    top: 97px;
+  }
 }
 
 @media screen and (min-width: 601px) {
   /*First page*/
+  nav {
+    height: 5rem;
+  }
   #restaurants-list li h3 {
     font-size: 1.08rem;
   }

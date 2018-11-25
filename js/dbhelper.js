@@ -91,6 +91,14 @@ static updateReady(worker){
   }
 
   /**
+   * Notify the user the connection status
+   */
+  static notificationDispature(message) {
+    const event = new CustomEvent('customnotification', { detail: message });
+    window.dispatchEvent(event);
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants() {
@@ -404,8 +412,10 @@ static updateReady(worker){
       .then((status) => {
         if(status){
           console.log("You are online.");
+          DBHelper.notificationDispature("You are online.");
         } else {
           console.log("You lost connection.");
+          DBHelper.notificationDispature("You lost connection.");
         }
       });
     });
