@@ -62,6 +62,7 @@ fetchRestaurantFromURL = () => {
     if (!id) { // no id found in URL
       reject('No restaurant id in URL');
     } else {
+      createReviewFormHTML(id);
       DBHelper.fetchRestaurantById(id)
       .then(restaurant => {
         self.restaurant = restaurant;
@@ -206,6 +207,147 @@ createReviewHTML = (review) => {
 
 
   return li;
+}
+
+/**
+ * Create new reviews form HTML and add it to the webpage.
+ */
+
+createReviewFormHTML = (id) => {
+  const section = document.getElementById('add-new-review-container');
+  
+  const divContainer = document.createElement('div');
+  divContainer.classList.add('form-wrapper');
+
+  const divTitle = document.createElement('div');
+  divTitle.classList.add('form-title');
+
+  const title = document.createElement('h3');
+  title.innerHTML = 'Add New Review';
+  divTitle.appendChild(title);
+
+  const divContent = document.createElement('div');
+  divContent.classList.add('form-content');
+
+  const form = document.createElement('form');
+  form.action = "#";
+  form.method = "POST";
+  form.setAttribute('aria-label', "Add a review");
+
+  const reviewId = document.createElement('input');
+  reviewId.type = "number";
+  reviewId.name = "id";
+  reviewId.id = "id";
+  reviewId.value = null;
+  reviewId.setAttribute('aria-hidden', true);
+  reviewId.hidden = true;
+
+  const restaurantId = document.createElement('input');
+  restaurantId.type = "number";
+  restaurantId.name = "restaurant_id";
+  restaurantId.id = "restaurant_id";
+  restaurantId.value = id;
+  restaurantId.setAttribute('aria-hidden', true);
+  restaurantId.hidden = true;
+
+  
+  const divName = document.createElement('div');
+  divName.classList.add('textfield');
+
+  const namelbl = document.createElement('label');
+  namelbl.setAttribute('for', 'name');
+  namelbl.innerHTML = "* Name:";
+  divName.appendChild(namelbl);
+
+  const nameinput = document.createElement('input');
+  nameinput.type = "text";
+  nameinput.name = "name";
+  nameinput.id = "name";
+  nameinput.required = true;
+  nameinput.setAttribute('aria-required', true);
+  divName.appendChild(nameinput);
+
+  const createdAt = document.createElement('input');
+  createdAt.type = "text";
+  createdAt.name = "createdAt";
+  createdAt.id = "createdAt";
+  createdAt.value = new Date().getTime();
+  createdAt.setAttribute('aria-hidden', true);
+  createdAt.hidden = true;
+
+  const updatedAt = document.createElement('input');
+  updatedAt.type = "text";
+  updatedAt.name = "updatedAt";
+  updatedAt.id = "updatedAt";
+  updatedAt.value = new Date().getTime();
+  updatedAt.setAttribute('aria-hidden', true);
+  updatedAt.hidden = true;
+
+  const divRating = document.createElement('div');
+  divRating.classList.add('textfield');
+
+  const ratinglabel = document.createElement('label');
+  ratinglabel.setAttribute('for', 'rating');
+  ratinglabel.innerHTML = "* Rating:";
+  divRating.appendChild(ratinglabel);
+
+  const ratingsOption = [1,2,3,4,5];
+
+  const ratingSelectList = document.createElement("select");
+  ratingSelectList.id = "rating";
+  ratingSelectList.name = "rating";
+  ratingSelectList.required = true;
+
+  let optionFirst = document.createElement("option");
+  optionFirst.value = "";
+  optionFirst.innerHTML = "Please choose a rating";
+  ratingSelectList.appendChild(optionFirst);
+
+  for (let i = 0; i < ratingsOption.length; i++) {
+      let option = document.createElement("option");
+      option.value = ratingsOption[i];
+      option.innerHTML = ratingsOption[i];
+      ratingSelectList.appendChild(option);
+  }
+
+  divRating.appendChild(ratingSelectList);
+
+  const divComment = document.createElement('div');
+  divComment.classList.add('textfield');
+
+  const commentlabel = document.createElement('label');
+  commentlabel.setAttribute('for', 'comments');
+  commentlabel.innerHTML = "Comments:";
+  divComment.appendChild(commentlabel);
+
+  const commentTextArea = document.createElement('textarea');
+  commentTextArea.name = "comments";
+  commentTextArea.id = "comments";
+  commentTextArea.cols = "4";
+  divComment.appendChild(commentTextArea);
+
+  const divSubmit = document.createElement('div');
+  divSubmit.classList.add('form-submit');
+
+  const submitButton = document.createElement('button');
+  submitButton.classList.add('submit-btn');
+  submitButton.type = "submit";
+  submitButton.innerHTML = "Add Review";
+  divSubmit.appendChild(submitButton);
+  
+  form.appendChild(divTitle);
+  form.appendChild(reviewId);
+  form.appendChild(restaurantId);
+  form.appendChild(divName);
+  form.appendChild(createdAt);
+  form.appendChild(updatedAt);
+  form.appendChild(divRating);
+  form.appendChild(divComment);
+  form.appendChild(divSubmit);
+
+  divContent.appendChild(form);
+  divContainer.appendChild(divContent);
+  section.appendChild(divContainer);
 }
 
 /**
