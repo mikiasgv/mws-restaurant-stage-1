@@ -4,6 +4,10 @@
 
 class DBHelper {
 
+  constructor(path){
+    this.path = path;
+  }
+
   static openDatabase(){
     // If the browser doesn't support service worker,
     // we don't care about having a database
@@ -11,10 +15,71 @@ class DBHelper {
       return Promise.resolve();
     }
   
-    return idb.open('mws-restaurant', 1, upgradeDb => {
-      upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+    return idb.open('mws-restaurant', 2, upgradeDb => {
+      switch(upgradeDb.oldVersion) {
+        case 0:
+          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+        case 1:
+          upgradeDb.createObjectStore('reviews', { keyPath: 'id' }); 
+      }
     });
   }
+
+  /**
+ * Register the serviceworker and so...
+ */
+static registerServiceWorker(){
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      
+      if (!navigator.serviceWorker.controller) {
+        return;
+      }
+  
+      if (registration.waiting) {
+        DBHelper.updateReady(registration.waiting);
+        return;
+      }
+  
+      if (registration.installing) {
+        DBHelper.trackInstalling(reg.installing);
+        return;
+      }
+  
+      registration.addEventListener('updatefound', function() {
+        DBHelper.trackInstalling(registration.installing);
+      });
+
+      // Ensure refresh is only called once.
+      // This works around a bug in "force update on reload".
+      var refreshing;
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        if (refreshing) return;
+        window.location.reload();
+        refreshing = true;
+      });
+
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  }
+}
+
+static trackInstalling(worker){
+  worker.addEventListener('statechange', function() {
+    if (worker.state == 'installed') {
+      DBHelper.updateReady(worker);
+    }
+  });
+};
+
+static updateReady(worker){
+  worker.postMessage({action: 'skipWaiting'});
+}
 
   /**
    * Database URL.
@@ -22,41 +87,50 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}/${DBHelper.path}`;
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants() {
+    DBHelper.path = 'restaurants';
     return new Promise(resolve => {
       fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())
       .then(restaurants => {
-        DBHelper.openDatabase()
-        .then(db => {
-          if (!db) return;
-
-          var tx = db.transaction('restaurants', 'readwrite');
-          var restaurantStore = tx.objectStore('restaurants');
-          restaurants.forEach(restaurant => restaurantStore.put(restaurant));
-          
-          resolve(restaurants);
-        })
+        DBHelper.saveDataToIDB('restaurants', restaurants);
+        resolve(restaurants);
       })
       .catch(err => {
         console.error(err);
         console.log('from cache');
-        return DBHelper.openDatabase()
-        .then(db => {
-          if (!db) return;
-  
-          var tx = db.transaction('restaurants');
-          var restaurantStore = tx.objectStore('restaurants');
-        
-          resolve(restaurantStore.getAll());
+        resolve(DBHelper.readDataFromIDB('restaurants'));
+      });
+    });
+  }
+
+  /**
+   * Fetch all reviews.
+   */
+  static fetchReviews(id) {
+    DBHelper.path = `reviews/?restaurant_id=${id}`;
+    return new Promise(resolve => {
+      fetch(DBHelper.DATABASE_URL)
+      .then(response => response.json())
+      .then(reviews => {
+        DBHelper.saveDataToIDB('reviews', reviews);
+        resolve(reviews);
+      })
+      .catch(err => {
+        console.error(err);
+        console.log('from cache');
+        DBHelper.readDataFromIDB('reviews')
+        .then((arrayOfReviews) =>  {
+          if(arrayOfReviews) {
+            resolve(arrayOfReviews.filter(r => r.restaurant_id == id));
+          }
         });
-        
       });
     });
   }
@@ -74,6 +148,24 @@ class DBHelper {
           resolve(restaurant);
         } else { // Restaurant does not exist in the database
           reject('Restaurant does not exist');
+        }
+      })
+      .catch(err => reject(err));
+    });
+  }
+
+  /**
+   * Fetch a review by restaurant ID.
+   */
+  static fetchReviewsByRestaurantId(id) {
+    // fetch all reviews with proper error handling.
+    return new Promise((resolve, reject) => {
+      DBHelper.fetchReviews(id)
+      .then(reviews => {
+        if (reviews) { // Got the review
+          resolve(reviews);
+        } else { // Review does not exist for the restaurant at hand
+          reject('No review(s) for this restaurant');
         }
       })
       .catch(err => reject(err));
@@ -191,6 +283,7 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
   } 
+
   /* static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
@@ -201,6 +294,53 @@ class DBHelper {
     );
     return marker;
   } */
+
+  //https://stackoverflow.com/questions/18884249/checking-whether-something-is-iterable
+  static isIterable(obj) {
+    // checks for null and undefined
+    if (obj == null) {
+      return false;
+    }
+    return typeof obj[Symbol.iterator] === 'function';
+  }
+  
+  static saveDataToIDB(storeName, items) {
+    return new Promise((resolve, reject) => {
+      DBHelper.openDatabase()
+      .then(db => {
+        if (!db) return;
+
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+
+        //check if the item(s) is iterable
+        if(DBHelper.isIterable(items)) {
+          items.forEach(item => store.put(item));
+        } else {
+          store.put(items);
+        }
+
+        return tx.complete;
+      })
+      .then(() => resolve(items))
+      .catch(err => reject(err));
+    });
+      
+  }
+  static readDataFromIDB(storeName) {
+    return new Promise((resolve, reject) => {
+      DBHelper.openDatabase()
+      .then((db ) => {
+        if (!db) return;
+
+        var tx = db.transaction(storeName, 'readonly');
+        var store = tx.objectStore(storeName);
+
+        resolve(store.getAll());
+      })
+      .catch(err => reject(err));
+    });
+  }
 
 }
 

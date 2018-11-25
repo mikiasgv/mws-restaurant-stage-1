@@ -6,6 +6,8 @@ var newMap;
  */
 document.addEventListener('DOMContentLoaded', (event) => {  
   initMap();
+  DBHelper.openDatabase();
+  DBHelper.registerServiceWorker();
 });
 
 /**
@@ -66,11 +68,40 @@ fetchRestaurantFromURL = () => {
       DBHelper.fetchRestaurantById(id)
       .then(restaurant => {
         self.restaurant = restaurant;
-        fillRestaurantHTML();
-        resolve(restaurant);
+        fetchReviewsOfResturant(id)
+        .then(reviews => {
+          self.restaurant.reviews = reviews;
+          fillRestaurantHTML();
+          resolve(restaurant);
+        })
+        .catch(err => {
+          self.restaurant.reviews = [];
+          fillRestaurantHTML();
+        });
       })
       .catch(err => reject(err));
     }
+  });
+}
+
+/**
+ * Change date to human readable format
+ */
+reviewDate = (rDate) => {
+  let newDate = new Date(Number(rDate));
+  return `${newDate.getDate()} / ${(newDate.getMonth()+1)} / ${newDate.getFullYear()}`;
+}
+
+/**
+ * Get current restaurant from page URL and get its review.
+ */
+fetchReviewsOfResturant = (id) => {
+  return new Promise((resolve, reject) => {
+    DBHelper.fetchReviewsByRestaurantId(id)
+    .then(reviews => {
+      resolve(reviews);
+    })
+    .catch(err => reject(err));
   });
 }
 
@@ -186,7 +217,7 @@ createReviewHTML = (review) => {
   div.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = reviewDate(review.updatedAt);
   date.classList.add("review-date");
   date.tabIndex = 0;
   div.appendChild(date);

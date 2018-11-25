@@ -13,65 +13,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap(); // added 
   fetchNeighborhoods();
   fetchCuisines();
-  registerServiceWorker();
+  DBHelper.openDatabase();
+  DBHelper.registerServiceWorker();
 });
-
-
-/**
- * Register the serviceworker and so...
- */
-registerServiceWorker = () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-      
-      if (!navigator.serviceWorker.controller) {
-        return;
-      }
-  
-      if (registration.waiting) {
-        updateReady(registration.waiting);
-        return;
-      }
-  
-      if (registration.installing) {
-        trackInstalling(reg.installing);
-        return;
-      }
-  
-      registration.addEventListener('updatefound', function() {
-        trackInstalling(registration.installing);
-      });
-
-      // Ensure refresh is only called once.
-      // This works around a bug in "force update on reload".
-      var refreshing;
-      navigator.serviceWorker.addEventListener('controllerchange', function() {
-        if (refreshing) return;
-        window.location.reload();
-        refreshing = true;
-      });
-
-      // Registration was successful
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-
-    }, function(err) {
-      // registration failed :(
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  }
-}
-
-trackInstalling = (worker) => {
-  worker.addEventListener('statechange', function() {
-    if (worker.state == 'installed') {
-      updateReady(worker);
-    }
-  });
-};
-
-updateReady = (worker) => {
-  worker.postMessage({action: 'skipWaiting'});
-}
 
 /**
  * Fetch all neighborhoods and set their HTML.
