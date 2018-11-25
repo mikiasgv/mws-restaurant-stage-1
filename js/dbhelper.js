@@ -296,6 +296,10 @@ static updateReady(worker){
   } */
 
   //https://stackoverflow.com/questions/18884249/checking-whether-something-is-iterable
+  /**
+   * 
+   * check if the object is iterable or not
+   */
   static isIterable(obj) {
     // checks for null and undefined
     if (obj == null) {
@@ -303,7 +307,35 @@ static updateReady(worker){
     }
     return typeof obj[Symbol.iterator] === 'function';
   }
-  
+
+  /**
+   * Save data to the api server while the app is online
+   * then after a successful save it will sve the review
+   * to indexed review db
+   */
+  static saveReviewToDatabase(url, data, store) {
+    return new Promise(function(resolve, reject){
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(function (review) {
+        resolve(DBHelper.saveDataToIDB(store, review));
+      })
+      .catch(function (error) {
+        reject(error)
+      });
+    });
+    
+  }
+
+  /**
+   * Save any data forwarded to indexdb with a given store name
+   */
   static saveDataToIDB(storeName, items) {
     return new Promise((resolve, reject) => {
       DBHelper.openDatabase()
@@ -327,6 +359,11 @@ static updateReady(worker){
     });
       
   }
+
+  /**
+   * 
+   * Read data from indexeddb with a given store name
+   */
   static readDataFromIDB(storeName) {
     return new Promise((resolve, reject) => {
       DBHelper.openDatabase()

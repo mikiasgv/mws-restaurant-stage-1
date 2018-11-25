@@ -241,6 +241,34 @@ createReviewHTML = (review) => {
 }
 
 /**
+ * With a given review(s) it will append the review next to the 
+ * existing reviews on the page
+ */
+addNewReviewsToPage = (reviews) => {
+  if(Array.isArray(reviews)) {
+    const ul = document.getElementById('reviews-list');
+    reviews.forEach(review => {
+      ul.appendChild(createReviewHTML(review));
+    });
+    ul.scrollIntoView(true);
+  } else if(!(Object.keys(reviews).length === 0 && reviews.constructor === Object)) {
+    const ul = document.getElementById('reviews-list');
+    ul.appendChild(createReviewHTML(reviews));
+    ul.scrollIntoView(true);
+  }
+}
+
+/**
+ * Save data to the api server while the app is online
+ */
+postDataFromThePage = (url, data, store) => {
+  DBHelper.saveReviewToDatabase(url, data, store)
+  .then(function(review){
+    addNewReviewsToPage(review);
+  });
+}
+
+/**
  * Create new reviews form HTML and add it to the webpage.
  */
 
@@ -379,6 +407,25 @@ createReviewFormHTML = (id) => {
   divContent.appendChild(form);
   divContainer.appendChild(divContent);
   section.appendChild(divContainer);
+
+  //start the saving review process
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const postUrl = 'http://localhost:1337/reviews/';
+    const data = {
+      id:  "",
+      restaurant_id: restaurantId.value,
+      name: nameinput.value,
+      createdAt: createdAt.value,
+      updatedAt: updatedAt.value,
+      rating: ratingSelectList.value,
+      comments: commentTextArea.value
+    };
+
+    postDataFromThePage(postUrl, data, 'reviews');
+
+  });
 }
 
 /**
