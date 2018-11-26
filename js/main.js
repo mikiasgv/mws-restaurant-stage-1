@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
   fetchCuisines();
   DBHelper.openDatabase();
   DBHelper.registerServiceWorker();
+  window.onload = () => {
+    handleOfflineFavorites();
+  };
 });
 
 /**
@@ -151,6 +154,62 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 }
 
 /**
+ * Favore unfavor a restorant on the DOM
+ */
+markRestaurantsAsFavoriteDOM = (element) => {
+  if(element.classList.contains('favorite-button--like')) {
+    element.classList.remove('favorite-button--like');
+    element.classList.add('favorite-button--dis');
+  } else {
+    element.classList.add('favorite-button--like');
+    element.classList.remove('favorite-button--dis');
+  }
+
+}
+
+/**
+ * Mark a restaurant as favorite
+ */
+//Mark as favorite on load if there are any marked when the app is offline
+handleOfflineFavorites = () => {
+  DBHelper.handleOfflineFavorites()
+  .then((offlineFavorites) => {
+    if(Array.isArray(offlineFavorites)) {
+      offlineFavorites.forEach((offlineFavor) => {
+        markRestaurantsAsFavoriteDOM(document.querySelector(`button#favor${offlineFavor.id}`));
+      });
+    } else if(!(Object.keys(offlineFavorites).length === 0 && offlineFavorites.constructor === Object)) {
+      markRestaurantsAsFavoriteDOM(document.querySelector(`button#favor${offlineFavorites.id}`));
+    }
+  });
+}
+
+/**
+ * Add functionality to favor unfavor a restaurant
+ */
+favorARestaurant = (restaurant, element) => {
+  DBHelper.checkNetworkStatus()
+  .then((status) => {
+    if(status) {//mark a restaurant as favorite while the app is online
+      DBHelper.markARestaurantAsToggle(restaurant, 'restaurants')
+      .then((response) => {
+        if(response){
+          markRestaurantsAsFavoriteDOM(element);
+        }
+      });
+    } else {//mark a restaurant as favorite while the app is offline
+      let indicator = 1;//Useful to show if the data is saved offline or online 1 0
+      DBHelper.saveDataToIDB('offline-favorites', restaurant, indicator)
+      .then((response) => {
+        if(response){
+          markRestaurantsAsFavoriteDOM(element);
+        }
+      });
+    }
+  });
+}
+
+/**
  * Create restaurant HTML.
  */
 createRestaurantHTML = (restaurant) => {
@@ -170,6 +229,20 @@ createRestaurantHTML = (restaurant) => {
   //image.sizes = "(min-width: 601px) 33.3vw,  100vw";
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
   article.append(image);
+
+  const favoriteBtn = document.createElement('button');
+  favoriteBtn.classList.add('favorite-button');
+  favoriteBtn.innerHTML = "❤";
+  favoriteBtn.id = `favor${restaurant.id}`;
+  let dynClass = restaurant.is_favorite == "true" ? "favorite-button--like" : "favorite-button--dis";
+  favoriteBtn.classList.add(dynClass);
+  
+  favoriteBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    favorARestaurant(restaurant, favoriteBtn);
+  });
+  article.append(favoriteBtn);
 
   const name = document.createElement('h3');
   name.innerHTML = restaurant.name;
@@ -218,4 +291,25 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 } */
+
+handleNotification = (message) => {
+  const notificationContainer = document.getElementById('online-offline-notification');
+  const notificationBody = document.getElementById('notification-body');
+  const closeNotification = document.getElementById('close-notification');
+
+  notificationBody.innerHTML = message.detail;
+  notificationBody.tabIndex = 0;
+  notificationContainer.classList.add('notification-show');
+  closeNotification.addEventListener('click', (event) => {
+    event.preventDefault();
+    notificationContainer.classList.remove('notification-show');
+  });
+}
+
+window.addEventListener('online', DBHelper.handleOfflineFavorites);
+window.addEventListener('offline', DBHelper.handleOfflineFavorites);
+/**
+ * Listene for notification event
+ */
+window.addEventListener('customnotification', handleNotification);
 

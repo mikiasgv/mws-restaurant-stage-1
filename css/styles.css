@@ -204,6 +204,26 @@ nav h1 a {
   font-weight: 600;
 }
 
+/*=======================Favorite button===========================*/
+.favorite-button {
+  font-size: 60px;
+  cursor: pointer;
+  position: relative;
+  font-size: 38px;
+  z-index: 9999999;
+  border: 1px solid #131619;
+  background: #131619;
+  top: -30px;
+  border-radius: 100%;
+}
+
+.favorite-button--like {
+  color: #ecad17 !important;
+}
+.favorite-button--dis {
+  color: #dfdfdf !important;
+}
+
 /* ====================== Restaurant Details ====================== */
 .inside header {
   position: fixed;
@@ -537,15 +557,17 @@ select {
 #online-offline-notification {
   border-radius: 32px 2px 2px 2px;
   background: #ecad17;
-  position: absolute;
+  position: fixed;
   display: flex;
   top: 123px;
   right: 0;
   align-items: center;
-  height: 30px;
+  height: auto;
   transition: all 0.3s ease-out;
   transform: translateX(100%);
   padding: 0 12px 0 45px;
+  z-index: 9999999999999 !important;
+  text-overflow: ellipsis;
 }
 
 #online-offline-notification p {
@@ -586,7 +608,7 @@ div#online-offline-notification button {
     font-size: 16px;
   }
   #online-offline-notification {
-    top: 97px;
+    top: 142px;
   }
 }
 
@@ -698,6 +720,9 @@ div#online-offline-notification button {
 @media screen and (min-width: 915px) {
   #restaurants-list li {
     width: 31%;
+  }
+  #online-offline-notification {
+    top: 90px;
   }
 
   /*Page two*/

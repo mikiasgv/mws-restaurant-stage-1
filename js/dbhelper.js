@@ -22,7 +22,9 @@ class DBHelper {
         case 1:
           upgradeDb.createObjectStore('reviews', { keyPath: 'id' }); 
         case 2:
-          upgradeDb.createObjectStore('offline-reviews', { keyPath: 'id' });  
+          upgradeDb.createObjectStore('offline-reviews', { keyPath: 'id' });
+        case 3:
+          upgradeDb.createObjectStore('offline-favorites', { keyPath: 'id' });    
       }
     });
   }
@@ -412,6 +414,33 @@ static updateReady(worker){
           });
   }
 
+  /**
+   * 
+   * Mark a selected restaurant a a vavorite or otherwise
+   */
+  static markARestaurantAsToggle(restaurant, storeName) {
+    let isFav = restaurant.is_favorite == "true" ? "false" : "true";
+    let url = `http://localhost:1337/restaurants/${restaurant.id}/?is_favorite=${isFav}`;
+    return new Promise(function(resolve, reject){
+      fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(restaurant)
+      })
+      .then(response => response.json())
+      .then(function (favorited) {
+        let indicator = 0;//Useful to show if the data is saved offline or online 1 0
+        resolve(DBHelper.saveDataToIDB(storeName, favorited, indicator));
+      })
+      .catch(function (error) {
+        reject(error)
+      });
+    });
+    
+  }
+
   //offlin online indicator
   static checkNetworkStatus() {
     return new Promise((resolve) => {
@@ -483,6 +512,58 @@ static updateReady(worker){
             DBHelper.notificationDispature("You lost connection.");
             resolve(false)
           });
+        }
+      });
+    });
+    
+  }
+
+  static handleOfflineFavorites() {
+    return new Promise((resolve) => {
+      DBHelper.checkNetworkStatus()
+      .then((status) => {
+        if(status){
+          console.log("You are now back online.");
+          DBHelper.notificationDispature("You are online.");
+          //Read all reviwes from offline store
+          DBHelper.readDataFromIDB('offline-favorites')
+          .then(function(offlineFavorites){
+            if (typeof offlineFavorites !== 'undefined' && offlineFavorites.length > 0) {
+              // the array is defined and has at least one element
+              let allFavorites = [];
+              offlineFavorites.forEach(favorite => {
+                allFavorites.push(DBHelper.markARestaurantAsToggle(favorite, 'restaurants'));
+              });
+              
+              Promise.all(allFavorites)
+              .then(function(updatedFavorites){
+                console.log('Offline favorites has now saved to the DB');
+                if(updatedFavorites) {
+                  DBHelper.clearAllDataFromIDB('offline-favorites')
+                  .then(() => {
+                    DBHelper.notificationDispature("All the restaurants favored offline are now posted to the server!");
+                    resolve(updatedFavorites)
+                  })
+                  .catch(() => resolve(false));
+                }
+              })
+              .catch(() => resolve(false));
+            }
+          })
+          .catch(() => resolve(false));
+        } else {
+          console.log("You lost connection.");
+          DBHelper.notificationDispature("You lost connection.");
+          DBHelper.readDataFromIDB('offline-favorites')
+          .then(function(offlineFavorites){
+            if (typeof offlineFavorites !== 'undefined' && offlineFavorites.length > 0) {
+              // the array is defined and has at least one element
+              console.log("Getting favorites from offline store while offline");
+              DBHelper.notificationDispature("The app is offline, accessing data from the browser cache.");
+              resolve(offlineFavorites);
+            }
+          })
+          .catch(() => resolve(false));
         }
       });
     });
