@@ -21,6 +21,8 @@ class DBHelper {
           upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
         case 1:
           upgradeDb.createObjectStore('reviews', { keyPath: 'id' }); 
+        case 2:
+          upgradeDb.createObjectStore('offline-reviews', { keyPath: 'id' });  
       }
     });
   }
@@ -107,7 +109,8 @@ static updateReady(worker){
       fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())
       .then(restaurants => {
-        DBHelper.saveDataToIDB('restaurants', restaurants);
+        let indicator = 0;//Useful to show if the data is saved offline or online 1 0
+        DBHelper.saveDataToIDB('restaurants', restaurants, indicator);
         resolve(restaurants);
       })
       .catch(err => {
@@ -127,7 +130,8 @@ static updateReady(worker){
       fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())
       .then(reviews => {
-        DBHelper.saveDataToIDB('reviews', reviews);
+        let indicator = 0;//Useful to show if the data is saved offline or online 1 0
+        DBHelper.saveDataToIDB('reviews', reviews, indicator);
         resolve(reviews);
       })
       .catch(err => {
@@ -332,7 +336,8 @@ static updateReady(worker){
       })
       .then(response => response.json())
       .then(function (review) {
-        resolve(DBHelper.saveDataToIDB(store, review));
+        let indicator = 0;//Useful to show if the data is saved offline or online 1 0
+        resolve(DBHelper.saveDataToIDB(store, review, indicator));
       })
       .catch(function (error) {
         reject(error)
@@ -344,7 +349,7 @@ static updateReady(worker){
   /**
    * Save any data forwarded to indexdb with a given store name
    */
-  static saveDataToIDB(storeName, items) {
+  static saveDataToIDB(storeName, items, indicator) {
     return new Promise((resolve, reject) => {
       DBHelper.openDatabase()
       .then(db => {
@@ -358,6 +363,10 @@ static updateReady(worker){
           items.forEach(item => store.put(item));
         } else {
           store.put(items);
+        }
+
+        if(indicator) {
+          DBHelper.notificationDispature("The data is saved to the browser cache, it will be posted to the server when the app is online...");
         }
 
         return tx.complete;
@@ -387,6 +396,22 @@ static updateReady(worker){
     });
   }
 
+  /**
+   * 
+   * Remove all the data from indexeddb with a given store name
+   */
+  static clearAllDataFromIDB(storeNames) {
+    return DBHelper.openDatabase()
+          .then((db ) => {
+            if (!db) return;
+
+            var tx = db.transaction(storeNames, 'readwrite');
+            var store = tx.objectStore(storeNames);
+            store.clear();
+            return tx.complete;
+          });
+  }
+
   //offlin online indicator
   static checkNetworkStatus() {
     return new Promise((resolve) => {
@@ -413,9 +438,51 @@ static updateReady(worker){
         if(status){
           console.log("You are online.");
           DBHelper.notificationDispature("You are online.");
+          //Read all reviwes from offline store if there are any and post them to the server
+          DBHelper.readDataFromIDB('offline-reviews')
+          .then(function(offlineReviews){
+            if (typeof offlineReviews !== 'undefined' && offlineReviews.length > 0) {
+              // the array is defined and has at least one element
+              let allReviews = [];
+              offlineReviews.forEach(review => {
+                review.id = "";
+                allReviews.push(DBHelper.saveReviewToDatabase('http://localhost:1337/reviews/', review, 'reviews'));
+              });
+              
+              Promise.all(allReviews)
+              .then(function(fulfiledReviews){
+                if(fulfiledReviews) {
+                  DBHelper.clearAllDataFromIDB('offline-reviews')
+                  .then(() => {
+                    if(fulfiledReviews) {
+                      DBHelper.notificationDispature("All the reviews saved offline are now posted to the server");
+                      resolve(fulfiledReviews)
+                    }
+                  })
+                  .catch(() => resolve(false));
+                }
+              })
+              .catch(() => resolve(false));
+            }
+          })
+          .catch(() => resolve(false));
+          
         } else {
           console.log("You lost connection.");
           DBHelper.notificationDispature("You lost connection.");
+          DBHelper.readDataFromIDB('offline-reviews')
+          .then(function(offlineReviews){
+            if (typeof offlineReviews !== 'undefined' && offlineReviews.length > 0) {
+              // the array is defined and has at least one element
+              console.log("Getting reviews from offline store while offline");
+              DBHelper.notificationDispature("The app is offline, accessing data from the browser cache.");
+              resolve(offlineReviews);
+            }
+          })
+          .catch(() => {
+            DBHelper.notificationDispature("You lost connection.");
+            resolve(false)
+          });
         }
       });
     });

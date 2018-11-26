@@ -265,8 +265,14 @@ addNewReviewsToPage = (reviews) => {
   }
 }
 
+/**
+ * Updates the UI by adding the reviews saved offline when the browser is refreshed offline
+ */
 handleConnectionChange = () => {
-  DBHelper.handleConnectionChange();
+  DBHelper.handleConnectionChange()
+  .then(function(reviews){
+    addNewReviewsToPage(reviews);
+  })
 }
 
 /**
@@ -274,6 +280,14 @@ handleConnectionChange = () => {
  */
 postDataFromThePage = (url, data, store) => {
   DBHelper.saveReviewToDatabase(url, data, store)
+  .then(function(review){
+    addNewReviewsToPage(review);
+  });
+}
+
+postDataToOfflineDb = (store, data) => {
+  let indicator = 1;//Useful to show if the data is saved offline or online 1 0
+  DBHelper.saveDataToIDB(store, data, indicator)
   .then(function(review){
     addNewReviewsToPage(review);
   });
@@ -437,18 +451,29 @@ createReviewFormHTML = (id) => {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const postUrl = 'http://localhost:1337/reviews/';
-    const data = {
-      id:  "",
-      restaurant_id: restaurantId.value,
-      name: nameinput.value,
-      createdAt: createdAt.value,
-      updatedAt: updatedAt.value,
-      rating: ratingSelectList.value,
-      comments: commentTextArea.value
-    };
+    DBHelper.checkNetworkStatus()
+    .then((status) => {
+      const postUrl = 'http://localhost:1337/reviews/';
+      const data = {
+        //if there is a connection then id should be empty
+        //otherwise use current date as ID and save it to indexeddb
+        id:  status ? "" : new Date().getTime(),
+        restaurant_id: restaurantId.value,
+        name: nameinput.value,
+        createdAt: createdAt.value,
+        updatedAt: updatedAt.value,
+        rating: ratingSelectList.value,
+        comments: commentTextArea.value
+      };
 
-    postDataFromThePage(postUrl, data, 'reviews');
+      if(status) {
+        //save the reviews to the server 
+        postDataFromThePage(postUrl, data, 'reviews');
+      } else {
+        //save the reviews to indexeddb
+        postDataToOfflineDb('offline-reviews', data);
+      }
+    });
 
   });
 }
