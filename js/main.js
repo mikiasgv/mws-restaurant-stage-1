@@ -208,11 +208,9 @@ handleOfflineFavorites = () => {
   .then((offlineFavorites) => {
     if(Array.isArray(offlineFavorites)) {
       offlineFavorites.forEach((offlineFavor) => {
-        //toggleFavoriteCheckbox(document.getElementById(`favorlbl${offlineFavor.id}`));
         document.getElementById(`favorlbl${offlineFavor.id}`).setAttribute('aria-checked', offlineFavor.is_favorite);
       });
     } else if(!(Object.keys(offlineFavorites).length === 0 && offlineFavorites.constructor === Object)) {
-      //toggleFavoriteCheckbox(document.getElementById(`favorlbl${offlineFavorites.id}`));
       document.getElementById(`favorlbl${offlineFavor.id}`).setAttribute('aria-checked', offlineFavor.is_favorite);
     }
   });
@@ -266,7 +264,7 @@ createRestaurantHTML = (restaurant) => {
   image.srcset = `${imageURL}.jpg 320w, ${imageURL}-420px.jpg 420w, 
                   ${imageURL}-600px.jpg 600w, ${imageURL}-800px.jpg 800w`;
   image.sizes = "(max-width: 600px) 100vw, (max-width: 915px) 50vw, (max-width: 1120px) 33.3vw, (max-width: 1520px) 25vw, 20vw";              
-  //image.sizes = "(min-width: 601px) 33.3vw,  100vw";
+  
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
   article.append(image);
 

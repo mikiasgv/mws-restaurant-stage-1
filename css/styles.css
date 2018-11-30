@@ -205,25 +205,6 @@ nav h1 a {
 }
 
 /*=======================Favorite button===========================*/
-.favorite-button {
-  font-size: 60px;
-  cursor: pointer;
-  position: relative;
-  font-size: 38px;
-  z-index: 9999999;
-  border: 1px solid #131619;
-  background: #131619;
-  top: -30px;
-  border-radius: 100%;
-}
-
-.favorite-button--like {
-  color: #ecad17 !important;
-}
-.favorite-button--dis {
-  color: #dfdfdf !important;
-}
-
 /*** custom checkboxes ***/
 
 [role="checkbox"][aria-checked="false"]:before {
