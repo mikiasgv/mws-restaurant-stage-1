@@ -296,14 +296,27 @@ postDataToOfflineDb = (store, data) => {
 handleNotification = (message) => {
   const notificationContainer = document.getElementById('online-offline-notification');
   const notificationBody = document.getElementById('notification-body');
+  const closelbl = document.createElement('label');
+  closelbl.id = "closeDesc";
+  closelbl.innerHTML = "close notification";
+  closelbl.setAttribute('aria-hidden', true);
+  closelbl.hidden = true;
+  notificationContainer.append(closelbl);
   const closeNotification = document.getElementById('close-notification');
+  closeNotification.setAttribute('aria-describedby', 'closeDesc');
 
   notificationBody.innerHTML = message.detail;
   notificationBody.tabIndex = 0;
   notificationContainer.classList.add('notification-show');
+  notificationContainer.setAttribute('aria-hidden', false);
+  notificationContainer.setAttribute('aria-live', 'assertive');
+  notificationContainer.setAttribute('aria-describedby', 'notification-body');
   closeNotification.addEventListener('click', (event) => {
     event.preventDefault();
     notificationContainer.classList.remove('notification-show');
+    notificationContainer.setAttribute('aria-hidden', true);
+    notificationBody.tabIndex = -1;
+    closeNotification.tabIndex = -1;
   });
 }
 

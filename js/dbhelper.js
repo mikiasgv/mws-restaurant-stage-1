@@ -418,8 +418,8 @@ static updateReady(worker){
    * 
    * Mark a selected restaurant a a vavorite or otherwise
    */
-  static markARestaurantAsToggle(restaurant, storeName) {
-    let isFav = restaurant.is_favorite == "true" ? "false" : "true";
+  static markARestaurantAsToggle(restaurant, storeName, isFav) {
+    //let isFav = restaurant.is_favorite == "true" ? "false" : "true";
     let url = `http://localhost:1337/restaurants/${restaurant.id}/?is_favorite=${isFav}`;
     return new Promise(function(resolve, reject){
       fetch(url, {
@@ -532,7 +532,7 @@ static updateReady(worker){
               // the array is defined and has at least one element
               let allFavorites = [];
               offlineFavorites.forEach(favorite => {
-                allFavorites.push(DBHelper.markARestaurantAsToggle(favorite, 'restaurants'));
+                allFavorites.push(DBHelper.markARestaurantAsToggle(favorite, 'restaurants', favorite.is_favorite));
               });
               
               Promise.all(allFavorites)
@@ -555,7 +555,7 @@ static updateReady(worker){
           console.log("You lost connection.");
           DBHelper.notificationDispature("You lost connection.");
           DBHelper.readDataFromIDB('offline-favorites')
-          .then(function(offlineFavorites){
+          .then((offlineFavorites) => {
             if (typeof offlineFavorites !== 'undefined' && offlineFavorites.length > 0) {
               // the array is defined and has at least one element
               console.log("Getting favorites from offline store while offline");

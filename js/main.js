@@ -21,6 +21,38 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 /**
+ * Handles all the notifictions showen to the user
+ */
+
+handleNotification = (message) => {
+  const notificationContainer = document.getElementById('online-offline-notification');
+  const notificationBody = document.getElementById('notification-body');
+  const closelbl = document.createElement('label');
+  closelbl.id = "closeDesc";
+  closelbl.innerHTML = "close notification";
+  closelbl.setAttribute('aria-hidden', true);
+  closelbl.hidden = true;
+  notificationContainer.append(closelbl);
+  const closeNotification = document.getElementById('close-notification');
+  closeNotification.setAttribute('aria-describedby', 'closeDesc');
+  closeNotification.setAttribute('aria-label', 'close notification');
+
+  notificationBody.innerHTML = message.detail;
+  notificationBody.tabIndex = 0;
+  notificationContainer.classList.add('notification-show');
+  notificationContainer.setAttribute('aria-hidden', false);
+  notificationContainer.setAttribute('aria-live', 'assertive');
+  notificationContainer.setAttribute('aria-describedby', 'notification-body');
+  closeNotification.addEventListener('click', (event) => {
+    event.preventDefault();
+    notificationContainer.classList.remove('notification-show');
+    notificationContainer.setAttribute('aria-hidden', true);
+    notificationBody.tabIndex = -1;
+    closeNotification.tabIndex = -1;
+  });
+}
+
+/**
  * Fetch all neighborhoods and set their HTML.
  */
 fetchNeighborhoods = () => {
@@ -156,16 +188,16 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 /**
  * Favore unfavor a restorant on the DOM
  */
-markRestaurantsAsFavoriteDOM = (element) => {
-  if(element.classList.contains('favorite-button--like')) {
-    element.classList.remove('favorite-button--like');
-    element.classList.add('favorite-button--dis');
-  } else {
-    element.classList.add('favorite-button--like');
-    element.classList.remove('favorite-button--dis');
+toggleFavoriteCheckbox = (label) => {
+
+  if (label.getAttribute('aria-checked') === 'true') {
+    label.setAttribute('aria-checked', 'false');
+  }
+  else {
+    label.setAttribute('aria-checked', 'true');
   }
 
-}
+};
 
 /**
  * Mark a restaurant as favorite
@@ -176,10 +208,12 @@ handleOfflineFavorites = () => {
   .then((offlineFavorites) => {
     if(Array.isArray(offlineFavorites)) {
       offlineFavorites.forEach((offlineFavor) => {
-        markRestaurantsAsFavoriteDOM(document.querySelector(`button#favor${offlineFavor.id}`));
+        //toggleFavoriteCheckbox(document.getElementById(`favorlbl${offlineFavor.id}`));
+        document.getElementById(`favorlbl${offlineFavor.id}`).setAttribute('aria-checked', offlineFavor.is_favorite);
       });
     } else if(!(Object.keys(offlineFavorites).length === 0 && offlineFavorites.constructor === Object)) {
-      markRestaurantsAsFavoriteDOM(document.querySelector(`button#favor${offlineFavorites.id}`));
+      //toggleFavoriteCheckbox(document.getElementById(`favorlbl${offlineFavorites.id}`));
+      document.getElementById(`favorlbl${offlineFavor.id}`).setAttribute('aria-checked', offlineFavor.is_favorite);
     }
   });
 }
@@ -187,14 +221,18 @@ handleOfflineFavorites = () => {
 /**
  * Add functionality to favor unfavor a restaurant
  */
-favorARestaurant = (restaurant, element) => {
+favorARestaurant = (restaurant) => {
+  restaurant.is_favorite = restaurant.is_favorite == "true" ? "false" : "true";
+
   DBHelper.checkNetworkStatus()
   .then((status) => {
     if(status) {//mark a restaurant as favorite while the app is online
-      DBHelper.markARestaurantAsToggle(restaurant, 'restaurants')
+      DBHelper.markARestaurantAsToggle(restaurant, 'restaurants', restaurant.is_favorite)
       .then((response) => {
         if(response){
-          markRestaurantsAsFavoriteDOM(element);
+          let message = {};
+          message.detail = `You ${response.is_favorite == "true" ? "favored" : "unfavored"} ${response.name} restaurant`;
+          handleNotification(message);
         }
       });
     } else {//mark a restaurant as favorite while the app is offline
@@ -202,7 +240,9 @@ favorARestaurant = (restaurant, element) => {
       DBHelper.saveDataToIDB('offline-favorites', restaurant, indicator)
       .then((response) => {
         if(response){
-          markRestaurantsAsFavoriteDOM(element);
+          let message = {};
+          message.detail = `You ${response.is_favorite == "true" ? "favored" : "unfavored"} ${response.name} restaurant`;
+          handleNotification(message);
         }
       });
     }
@@ -230,19 +270,34 @@ createRestaurantHTML = (restaurant) => {
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
   article.append(image);
 
-  const favoriteBtn = document.createElement('button');
-  favoriteBtn.classList.add('favorite-button');
-  favoriteBtn.innerHTML = "❤";
-  favoriteBtn.id = `favor${restaurant.id}`;
-  let dynClass = restaurant.is_favorite == "true" ? "favorite-button--like" : "favorite-button--dis";
-  favoriteBtn.classList.add(dynClass);
+  const favoriteLabel = document.createElement('label');
+  favoriteLabel.id = `favorlbl${restaurant.id}`;
+  favoriteLabel.classList.add('favorite-label');
+  favoriteLabel.tabIndex = 0;
+  favoriteLabel.setAttribute('role', 'checkbox');
+  favoriteLabel.setAttribute('aria-label', 'Mark a restaurant as your favorite');
+  favoriteLabel.setAttribute('aria-checked', `${restaurant.is_favorite == "true" ? true : false}`);
+
+  article.append(favoriteLabel);
+
+  favoriteLabel.addEventListener('click', (event) => {
+    event.preventDefault();
+    
+    toggleFavoriteCheckbox(favoriteLabel);
+    favorARestaurant(restaurant);
+  });
   
-  favoriteBtn.addEventListener('click', (event) => {
+  // Execute a function when the user releases a key on the keyboard
+  favoriteLabel.addEventListener("keyup", (event) => {
+    event.stopPropagation();
     event.preventDefault();
 
-    favorARestaurant(restaurant, favoriteBtn);
+    // Number 32 is the "Space" key on the keyboard
+    if (event.keyCode === 32 ) {
+      toggleFavoriteCheckbox(favoriteLabel);
+      favorARestaurant(restaurant);
+    }
   });
-  article.append(favoriteBtn);
 
   const name = document.createElement('h3');
   name.innerHTML = restaurant.name;
@@ -291,20 +346,6 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 } */
-
-handleNotification = (message) => {
-  const notificationContainer = document.getElementById('online-offline-notification');
-  const notificationBody = document.getElementById('notification-body');
-  const closeNotification = document.getElementById('close-notification');
-
-  notificationBody.innerHTML = message.detail;
-  notificationBody.tabIndex = 0;
-  notificationContainer.classList.add('notification-show');
-  closeNotification.addEventListener('click', (event) => {
-    event.preventDefault();
-    notificationContainer.classList.remove('notification-show');
-  });
-}
 
 window.addEventListener('online', DBHelper.handleOfflineFavorites);
 window.addEventListener('offline', DBHelper.handleOfflineFavorites);

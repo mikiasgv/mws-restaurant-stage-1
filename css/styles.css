@@ -224,6 +224,25 @@ nav h1 a {
   color: #dfdfdf !important;
 }
 
+/*** custom checkboxes ***/
+
+[role="checkbox"][aria-checked="false"]:before {
+  display: inline-block;
+  cursor: pointer;
+}
+[role="checkbox"][aria-checked="false"]:before { 
+  content: "❤"; 
+  color:#dfdfdf; 
+  cursor: pointer; 
+  font-size: 38px;
+} /* unchecked icon */
+[role="checkbox"][aria-checked="true"]:before { 
+  content: "❤"; 
+  color:#ecad17; 
+  cursor: pointer; 
+  font-size: 38px;
+} /* checked icon */
+
 /* ====================== Restaurant Details ====================== */
 .inside header {
   position: fixed;
